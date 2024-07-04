@@ -1,6 +1,7 @@
 [package]
 authors = ["Ziboh <sharezhou@outlook.com>"]
 categories = ["command-line-utilities"]
+description = "qwen is program to send messages to Qwen API."
 homepage ="https://github.com/ziboh/qwen" 
 license = "MIT"
 name = "qwen"
