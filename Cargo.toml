@@ -1,14 +1,25 @@
 [package]
+authors = ["Ziboh <sharezhou@outlook.com>"]
+categories = ["command-line-utilities"]
+homepage ="https://github.com/ziboh/qwen" 
+license = "MIT"
 name = "qwen"
 version = "0.1.0"
+keywords = [
+    "chat",
+    "tool",
+    "qwen",
+]
+repository = "https://github.com/ziboh/qwen"
 edition = "2021"
+readme = "README.md"
 
 [[bin]]
 name = "qwen"
 path = "src/bin/qwen.rs"
 
 [dependencies]
-reqwest = { version = "0.12", features = ["blocking", "json","stream"] }
+reqwest = { version = "0.12", features = ["rustls-tls", "json"],default-features = false }
 tokio = { version = "1", features = ["full"] }
 url = "2.5"
 thiserror = "1.0.61"
@@ -17,11 +28,21 @@ serde = { version = "1.0.188", features = ["derive"] }
 
 futures-util = { version = "0.3.28" }
 bytes = "1.6.0"
-eventsource-stream = "0.2.3"
+eventsource-stream = {version = "0.2.3",optional=true}
 
 clap = { version = "4.5.8", features = ["derive"] }
 rustyline = "14.0.0"
 
+[dev-dependencies]
+qwen = { path = ".", features = [
+    "streams",
+] }
+
+[profile.release]
+lto = true
+strip = true
+codegen-units = 1
 
 [features]
-streams = []
+default = ["streams"]
+streams = ["eventsource-stream","reqwest/stream"]

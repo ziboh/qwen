@@ -6,10 +6,13 @@ use crate::{
 };
 use reqwest::{
     header::{HeaderMap, HeaderValue, AUTHORIZATION, CONTENT_TYPE},
-    Client, Response,
+    Client,
 };
-// #[cfg(feature = "streams")]
+
+#[cfg(feature = "streams")]
 use futures_util::Stream;
+#[cfg(feature = "streams")]
+use reqwest::Response;
 
 pub struct Qwen {
     pub client: Client,
@@ -87,6 +90,7 @@ impl Qwen {
         }
     }
 
+    #[cfg(feature = "streams")]
     pub async fn send_history_message_streaming(
         &self,
         history: &Vec<ChatMessage>,
@@ -109,6 +113,7 @@ impl Qwen {
         self.process_streaming_response(response)
     }
 
+    #[cfg(feature = "streams")]
     pub async fn send_message_streaming<S>(
         &self,
         question: S,
@@ -128,7 +133,7 @@ impl Qwen {
         ];
         self.send_history_message_streaming(&input).await
     }
-
+    #[cfg(feature = "streams")]
     fn process_streaming_response(
         &self,
         response: Response,
@@ -136,10 +141,12 @@ impl Qwen {
         use eventsource_stream::Eventsource;
         use futures_util::StreamExt;
 
+        let mut a = String::new();
         response
             .error_for_status()
             .map(|response| {
                 let response_stream = response.bytes_stream().eventsource();
+                a.push_str("hello");
                 response_stream.map(|part| {
                     let data = part.expect("Stream closed abruptly!").data;
                     let res_data: CompletionResponse = serde_json::from_str(&data).expect("eror");

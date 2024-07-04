@@ -10,10 +10,10 @@ use std::{cell::RefCell, env, io::Write, rc::Rc};
 ))]
 struct ModeArg {
     #[arg(short, long)]
-    /// using Streaming Output
+    /// 使用流式输出
     stream: bool,
     #[arg(short, long)]
-    /// wait for output to complete
+    /// 等待回应完成后输出
     complete: bool,
 }
 #[derive(Parser)]
@@ -28,20 +28,21 @@ struct Cli {
 }
 #[derive(Subcommand)]
 enum Commands {
+    /// 翻译成中文
     Translate {
         /// input message
         message: String,
         #[command(flatten)]
         shared_args: ModeArg,
     },
+    /// 消息内容
     Ask {
-        /// 消息内容
         message: String,
         #[command(flatten)]
         shared_args: ModeArg,
     },
+    /// 连续聊天
     Chat {
-        /// 连续聊天
         message: Option<String>,
         #[command(flatten)]
         shared_args: ModeArg,
@@ -92,7 +93,7 @@ async fn main() -> Result<()> {
         let stream = client.send_message_streaming(question).await.unwrap();
         stream
             .for_each(|message| async move {
-                println!("{message}");
+                print!("{message}");
                 std::io::stdout().flush().unwrap();
             })
             .await;
@@ -137,6 +138,11 @@ async fn chat_with_stream(
         }
         if buf.starts_with(":q") {
             return Ok(());
+        }
+        if buf.starts_with(":r") {
+            converse_client.clear_history();
+            println!("已清空聊天历史\n");
+            continue;
         }
         let res = converse_client.send_message_streaming(buf).await?;
         print!("Qwen:");

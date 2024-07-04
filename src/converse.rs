@@ -66,4 +66,9 @@ impl Conversation {
             content,
         })
     }
+
+    pub fn clear_history(&mut self){
+        self.history.truncate(1);
+    }
+
 }
