@@ -2,15 +2,11 @@
 authors = ["Ziboh <sharezhou@outlook.com>"]
 categories = ["command-line-utilities"]
 description = "qwen is program to send messages to Qwen API."
-homepage ="https://github.com/ziboh/qwen" 
+homepage = "https://github.com/ziboh/qwen"
 license = "MIT"
 name = "qwen"
 version = "0.1.0"
-keywords = [
-    "chat",
-    "tool",
-    "qwen",
-]
+keywords = ["chat", "tool", "qwen"]
 repository = "https://github.com/ziboh/qwen"
 edition = "2021"
 readme = "README.md"
@@ -20,24 +16,25 @@ name = "qwen"
 path = "src/bin/qwen.rs"
 
 [dependencies]
-reqwest = { version = "0.12", features = ["rustls-tls", "json"],default-features = false }
-tokio = { version = "1",features = ["macros"]  }
+reqwest = { version = "0.12", features = [
+  "rustls-tls",
+  "json",
+], default-features = false }
+tokio = { version = "1", features = ["macros"] }
 url = "2.5"
 thiserror = "1.0.61"
 serde_json = "1.0.0"
 serde = { version = "1.0.188", features = ["derive"] }
 
 futures-util = { version = "0.3.28" }
-eventsource-stream = {version = "0.2.3",optional=true}
+eventsource-stream = { version = "0.2.3", optional = true }
 
 clap = { version = "4.5.8", features = ["derive"] }
 rustyline = "14.0.0"
 
 [dev-dependencies]
-qwen = { path = ".", features = [
-    "streams",
-] }
-tokio = { version = "1",features = ["macros","rt-multi-thread"]  }
+qwen = { path = ".", features = ["streams"] }
+tokio = { version = "1", features = ["macros", "rt-multi-thread"] }
 
 [profile.release]
 lto = true
@@ -46,4 +43,4 @@ codegen-units = 1
 
 [features]
 default = ["streams"]
-streams = ["eventsource-stream","reqwest/stream"]
+streams = ["eventsource-stream", "reqwest/stream"]
