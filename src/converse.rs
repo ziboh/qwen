@@ -23,12 +23,14 @@ impl Conversation {
     pub fn new_with_history(client: Qwen, history: Vec<ChatMessage>) -> Self {
         Self { client, history }
     }
+
     /// Rollbacks the history by 1 message, removing the last sent and received message.
     pub fn rollback(&mut self) -> Option<ChatMessage> {
         let last = self.history.pop();
         self.history.pop();
         last
     }
+
     /// Sends the message to the ChatGPT API and returns the completion response.
     ///
     /// Execution speed depends on API response times.

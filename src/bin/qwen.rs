@@ -2,7 +2,7 @@ use clap::{ArgGroup, Parser, Subcommand};
 use futures_util::StreamExt;
 use qwen::{client::Qwen, converse::Conversation, Result};
 use rustyline::{error::ReadlineError, DefaultEditor};
-use std::{cell::RefCell, env, io::Write, rc::Rc};
+use std::{env, io::Write};
 
 #[derive(Parser)]
 #[command(group(
@@ -49,7 +49,7 @@ enum Commands {
     },
 }
 
-#[tokio::main]
+#[tokio::main(flavor = "current_thread")]
 async fn main() -> Result<()> {
     let cli = Cli::parse();
     let api_key = env::var("QWEN_API_KEY")?;
@@ -109,7 +109,7 @@ async fn chat_with_stream(
     let mut rl = DefaultEditor::new().unwrap();
     loop {
         let mut buf = String::new();
-        let ouput = Rc::new(RefCell::new(String::new()));
+        // 判断是否提供了默认消息
         if message.is_none() {
             let readline = rl.readline(">> ");
             buf = match readline {
@@ -144,18 +144,16 @@ async fn chat_with_stream(
             println!("已清空聊天历史\n");
             continue;
         }
-        let res = converse_client.send_message_streaming(buf).await?;
+        let mut stream = converse_client.send_message_streaming(buf).await?;
         print!("Qwen:");
-        res.for_each(|s| {
-            let o = Rc::clone(&ouput);
-            async move {
-                print!("{s}");
-                std::io::stdout().flush().unwrap();
-                o.borrow_mut().push_str(s.as_str());
-            }
-        })
-        .await;
+        // 保存恢复，以便添加到history
+        let mut output = String::new();
+        while let Some(res) = stream.next().await {
+            print!("{res}");
+            std::io::stdout().flush().unwrap();
+            output.push_str(res.as_str());
+        }
         println!("\n");
-        converse_client.add_history(ouput.as_ref().borrow().clone());
+        converse_client.add_history(output);
     }
 }
