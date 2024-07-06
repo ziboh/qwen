@@ -1,3 +1,4 @@
+#![doc = include_str!("../README.md")]
 /// 包含了一些Qwen客户端功能
 pub mod client;
 /// 包含一些Api配置

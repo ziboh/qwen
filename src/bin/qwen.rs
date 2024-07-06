@@ -2,7 +2,10 @@ use clap::{ArgGroup, Parser, Subcommand};
 use futures_util::StreamExt;
 use qwen::{client::Qwen, converse::Conversation, Result};
 use rustyline::{error::ReadlineError, DefaultEditor};
-use std::{env, io::Write};
+use std::{
+    env,
+    io::{IsTerminal, Read, Write},
+};
 
 #[derive(Parser)]
 #[command(group(
@@ -41,8 +44,20 @@ enum Commands {
         #[command(flatten)]
         shared_args: ModeArg,
     },
+    AskPipe {
+        message: String,
+        #[command(flatten)]
+        shared_args: ModeArg,
+    },
+
     /// 连续聊天
     Chat {
+        message: Option<String>,
+        #[command(flatten)]
+        shared_args: ModeArg,
+    },
+
+    TransHelp {
         message: Option<String>,
         #[command(flatten)]
         shared_args: ModeArg,
@@ -63,6 +78,45 @@ async fn main() -> Result<()> {
                 "你是一个翻译官，无论接下来输入什么，你都要翻译成中文。内容是：{}",
                 message
             );
+            (message, shared_args.complete)
+        }
+        Some(Commands::AskPipe {
+            message,
+            shared_args,
+        }) => {
+            let stdin = std::io::stdin();
+            let message = if stdin.is_terminal() {
+                eprintln!("使用qwen --help 查看帮助");
+                return Ok(());
+            } else {
+                let mut buf = String::new();
+                std::io::stdin()
+                    .read_to_string(&mut buf)
+                    .expect("Failed to read from stdin");
+                format!("```\n{}```\n{}", buf, message)
+            };
+            (message, shared_args.complete)
+        }
+        Some(Commands::TransHelp {
+            message,
+            shared_args,
+        }) => {
+            let message = match message {
+                Some(message) => format!("```\n{}\n```", message),
+                None => {
+                    let stdin = std::io::stdin();
+                    if stdin.is_terminal() {
+                        eprintln!("使用qwen --help 查看帮助");
+                        return Ok(());
+                    } else {
+                        let mut buf = String::new();
+                        std::io::stdin()
+                            .read_to_string(&mut buf)
+                            .expect("Failed to read from stdin");
+                        format!("```\n{}```\n上面是一个命令的帮助，请翻译成中文", buf)
+                    }
+                }
+            };
             (message, shared_args.complete)
         }
         Some(Commands::Ask {
