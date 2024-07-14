@@ -44,6 +44,7 @@ impl Qwen {
             .build()?;
         Ok(Self { client, config })
     }
+
     pub async fn send_message<S: Into<String>>(
         &self,
         question: S,
@@ -58,12 +59,12 @@ impl Qwen {
                 content: question.into(),
             },
         ];
-        self.send_history_message(&input).await
+        self.send_history_message(input).await
     }
 
     pub async fn send_history_message(
         &self,
-        history: &Vec<ChatMessage>,
+        history: Vec<ChatMessage>,
     ) -> crate::Result<CompletionResponse> {
         let response: ServerResponse = self
             .client
@@ -93,7 +94,7 @@ impl Qwen {
     #[cfg(feature = "streams")]
     pub async fn send_history_message_streaming(
         &self,
-        history: &Vec<ChatMessage>,
+        history: Vec<ChatMessage>,
     ) -> crate::Result<impl Stream<Item = String>> {
         let response = self
             .client
@@ -131,7 +132,7 @@ impl Qwen {
                 content: question.into(),
             },
         ];
-        self.send_history_message_streaming(&input).await
+        self.send_history_message_streaming(input).await
     }
     #[cfg(feature = "streams")]
     fn process_streaming_response(

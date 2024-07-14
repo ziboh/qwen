@@ -1,17 +1,17 @@
 use serde::{Deserialize, Serialize};
 
-#[derive(Serialize)]
-pub struct Input<'a> {
-    pub messages: &'a Vec<ChatMessage>,
+#[derive(Clone, Serialize, Deserialize)]
+pub struct Input {
+    pub messages: Vec<ChatMessage>,
 }
 
-#[derive(Serialize, Deserialize)]
+#[derive(Clone, Serialize, Deserialize)]
 pub struct ChatMessage {
     pub role: Role,
     pub content: String,
 }
 
-#[derive(Serialize, Deserialize)]
+#[derive(Clone, Serialize, Deserialize)]
 #[serde(rename_all = "lowercase")]
 pub enum Role {
     System,
@@ -32,7 +32,7 @@ pub struct Parameter {
 #[derive(Serialize)]
 pub struct CompletionRequest<'a> {
     pub model: &'a str,
-    pub input: Input<'a>,
+    pub input: Input,
     pub parameters: Parameter,
 }
 
@@ -49,6 +49,7 @@ pub struct CompletionResponse {
     usage: TokenUsage,
     request_id: String,
 }
+
 impl CompletionResponse {
     pub fn content(&self) -> String {
         self.output.choices.first().unwrap().message.content.clone()

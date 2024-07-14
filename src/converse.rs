@@ -42,7 +42,7 @@ impl Conversation {
             role: Role::User,
             content: message.into(),
         });
-        let response = self.client.send_history_message(&self.history).await;
+        let response = self.client.send_history_message(self.history.clone()).await;
         if let Ok(complete) = response.as_ref() {
             self.history.push(ChatMessage {
                 role: Role::Assistant,
@@ -59,18 +59,19 @@ impl Conversation {
             role: Role::User,
             content: message.into(),
         });
-        self.client.send_history_message_streaming(&self.history).await
+        self.client
+            .send_history_message_streaming(self.history.clone())
+            .await
     }
 
-    pub fn add_history(&mut self,content:String){
-        self.history.push(ChatMessage{
-            role:Role::Assistant,
+    pub fn add_history(&mut self, content: String) {
+        self.history.push(ChatMessage {
+            role: Role::Assistant,
             content,
         })
     }
 
-    pub fn clear_history(&mut self){
+    pub fn clear_history(&mut self) {
         self.history.truncate(1);
     }
-
 }
